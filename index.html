@@ -249,6 +249,12 @@
       from { transform: scaleX(1); }
       to { transform: scaleX(0); }
     }
+    /* On small screens (<= 600px) force full width */
+    @media (max-width: 600px) {
+      .logo-section {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -267,9 +273,8 @@
       <div>
         <h1>OpenPGP.js — Symmetric Encrypt / Decrypt</h1>
         <div class="muted">Passphrase-based encryption (AES256). Works in browser and Node.</div>
-
       </div>
-      <div style="margin-left: auto;"><img height="50" src="assets/images/logo-transparent.png" alt="Digital Shareware"></div>
+      <div class="logo-section" style="margin-left: auto;"><img height="50" src="assets/images/logo-transparent.png" alt="Digital Shareware"></div>
     </div>
 
     <div class="card">
