@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toaster with SVG Icons</title>
+<style>
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 2rem;
+  }
+
+  /* Toaster container */
+  .toaster {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    z-index: 10000;
+  }
+
+  /* Toast */
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 260px;
+    max-width: 360px;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    color: #fff;
+    backdrop-filter: blur(12px) saturate(160%);
+    background: rgba(30, 41, 59, 0.75);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toast .icon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+  }
+
+  .toast .message {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .toast .close-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  .toast .close-btn:hover { opacity: 1; }
+
+  /* Variants with Tailwind-style colors */
+  .toast.success { border-left: 5px solid #22c55e; }   /* green-500 */
+  .toast.error   { border-left: 5px solid #ef4444; }   /* red-500 */
+  .toast.info    { border-left: 5px solid #2563eb; }   /* blue-600 */
+  .toast.warning { border-left: 5px solid #f59e0b; }   /* amber-500 */
+
+  /* Progress bar */
+  .toast .progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.6);
+    transform-origin: left;
+    animation: shrink linear forwards;
+  }
+
+  /* Animations */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes slideOut {
+    to { opacity: 0; transform: translateY(20px) scale(0.95); }
+  }
+  @keyframes shrink {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="toaster" id="toaster"></div>
+
+<div>
+  <button onclick="showToast('File uploaded successfully!', 'success')">Success</button>
+  <button onclick="showToast('OpenPGP.js failed to load.', 'error')">Error</button>
+  <button onclick="showToast('New update available!', 'info')">Info</button>
+  <button onclick="showToast('Low disk space warning.', 'warning')">Warning</button>
+</div>
+
+<script>
+  function showToast(message, type = "info", duration = 4000) {
+    const toaster = document.getElementById("toaster");
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+
+    // SVG icons with Tailwind colors
+    const icons = {
+      success: `<svg class="icon" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
+      error: `<svg class="icon" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`,
+      info: `<svg class="icon" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17z"/></svg>`,
+      warning: `<svg class="icon" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a1.5 1.5 0 0 0 1.29 2.25h17.78a1.5 1.5 0 0 0 1.29-2.25L13.71 3.86a1.5 1.5 0 0 0-2.42 0z"/></svg>`
+    };
+
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="message">${message}</div>
+      <button class="close-btn">&times;</button>
+      <div class="progress"></div>
+    `;
+
+    toaster.appendChild(toast);
+
+    // Progress animation
+    const progress = toast.querySelector(".progress");
+    progress.style.animationDuration = duration + "ms";
+
+    // Remove logic
+    const removeToast = () => {
+      toast.style.animation = "slideOut 0.3s forwards";
+      setTimeout(() => toast.remove(), 300);
+    };
+
+    // Auto-remove
+    const timer = setTimeout(removeToast, duration);
+
+    // Manual close
+    toast.querySelector(".close-btn").addEventListener("click", () => {
+      clearTimeout(timer);
+      removeToast();
+    });
+  }
+</script>
+
+</body>
+</html>

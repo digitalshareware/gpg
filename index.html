@@ -40,10 +40,228 @@
     .filebox{border:1px dashed #e6edf8;padding:10px;border-radius:6px;background:#fbfdff}
     footer{margin-top:12px;font-size:12px;color:var(--muted)}
     .center{display:flex;align-items:center;justify-content:center}
+
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Overlay */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    /* Alert Box */
+    .alert-box {
+      background: #fff;
+      padding: 20px;
+      width: 300px;
+      max-width: 90%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      text-align: center;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .alert-box h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #e63946;
+    }
+
+    .alert-box p {
+      margin: 0 0 20px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .alert-box button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: #e63946;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .alert-box button:hover {
+      background: #c82333;
+    }
+
+
+    /* Success Styling */
+    .alert-success h2 {
+      color: #2e7d32; /* green */
+    }
+
+    .alert-success button {
+      background: #2e7d32;
+    }
+
+    .alert-success button:hover {
+      background: #1b5e20;
+    }
+
+    /* Error Styling (reuse from earlier if needed) */
+    .alert-error h2 {
+      color: #e63946; /* red */
+    }
+
+    .alert-error button {
+      background: #e63946;
+    }
+
+    .alert-error button:hover {
+      background: #c82333;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.8);}
+      to {opacity: 1; transform: scale(1);}
+    }
+
+
+    .file-input {
+      display: none; /* hide real file input */
+    }
+
+    .file-label {
+      display: inline-block;   /* allow styling */
+      padding: 6px 10px;       /* button padding */
+      background-color: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: fit-content;      /* <-- key: width matches text */
+      white-space: nowrap;     /* prevent wrapping */
+    }
+
+    .file-label:hover {
+      background-color: #1e40af;
+    }
+
+    .file-name {
+      margin-left: 10px;
+      font-size: 13px;
+      color: #333;
+    }
+  </style>
+  <style>
+    /* body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 2rem;
+    } */
+
+    /* Toaster container */
+    .toaster {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      z-index: 10000;
+    }
+
+    /* Toast */
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      min-width: 260px;
+      max-width: 360px;
+      padding: 0.9rem 1rem;
+      border-radius: 14px;
+      color: #fff;
+      backdrop-filter: blur(12px) saturate(160%);
+      background: rgba(30, 41, 59, 0.75);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toast .icon {
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+    }
+
+    .toast .message {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .toast .close-btn {
+      background: transparent;
+      border: none;
+      color: inherit;
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .toast .close-btn:hover { opacity: 1; }
+
+    /* Variants with Tailwind-style colors */
+    .toast.success { border-left: 5px solid #22c55e; }   /* green-500 */
+    .toast.error   { border-left: 5px solid #ef4444; }   /* red-500 */
+    .toast.info    { border-left: 5px solid #2563eb; }   /* blue-600 */
+    .toast.warning { border-left: 5px solid #f59e0b; }   /* amber-500 */
+
+    /* Progress bar */
+    .toast .progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.6);
+      transform-origin: left;
+      animation: shrink linear forwards;
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateY(20px) scale(0.95); }
+    }
+    @keyframes shrink {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
   </style>
 </head>
 <body>
+  <div class="toaster" id="toaster"></div>
+
   <div class="app">
+    <!-- <div>
+      <button onclick="showToast('File uploaded successfully!', 'success')">Success</button>
+      <button onclick="showToast('OpenPGP.js failed to load.', 'error')">Error</button>
+      <button onclick="showToast('New update available!', 'info')">Info</button>
+      <button onclick="showToast('Low disk space warning.', 'warning')">Warning</button>
+    </div> -->
+
     <div class="header">
       <div class="logo">PG</div>
       <div>
@@ -98,11 +316,13 @@
         <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
 
         <div>
-          <label>Encrypt a file</label>
+          <label for="fileInputEnc">Encrypt a file</label>
           <div class="filebox">
             <div style="display:flex;gap:8px;align-items:center">
-              <input id="fileInputEnc" type="file" />
-              <button id="encFileBtn" class="btn small">Encrypt File & Download .gpg</button>
+              <input type="file" id="fileInputEnc" class="file-input">
+              <label for="fileInputEnc" class="file-label">Choose File</label>
+              <span class="file-name" id="fileNameEnc">No file chosen</span>
+              <button id="encFileBtn" class="btn small" style="margin-left: auto;">Encrypt File & Download .gpg</button>
             </div>
             <div class="notes">Selected file will be encrypted with the passphrase and downloaded as a binary `.gpg` file.</div>
           </div>
@@ -113,8 +333,8 @@
       <div id="panel-decrypt" style="display:none">
         <div class="two">
           <div>
-            <label for="ciphertext">Encrypted text (ASCII-armored)</label>
-            <textarea id="ciphertext" placeholder="Paste armored encrypted text here..."></textarea>
+            <label for="cipherText">Encrypted text (ASCII-armored)</label>
+            <textarea id="cipherText" placeholder="Paste armored encrypted text here..."></textarea>
             <div class="controls" style="margin-top:8px">
               <button id="decBtn" class="btn small">Decrypt</button>
               <button id="encryptedTextCopy" class="btn ghost small">Copy Encrypted Text</button>
@@ -132,12 +352,15 @@
         <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
 
         <div>
-          <label>Decrypt a .gpg file</label>
+          <label for="fileInputDec">Decrypt a .gpg file</label>
           <div class="filebox">
             <div style="display:flex;gap:8px;align-items:center">
-              <input id="fileInputDec" type="file" accept=".gpg" />
-              <button id="decFileBtn" class="btn small">Decrypt File & Download</button>
+              <input type="file" id="fileInputDec" class="file-input" accept=".gpg" />
+              <label for="fileInputDec" class="file-label">Choose File</label>
+              <span class="file-name" id="fileNameDec">No file chosen</span>
+              <button id="decFileBtn" class="btn small" style="margin-left: auto;">Decrypt File & Download</button>
             </div>
+
             <div class="notes">Select a `.gpg` file encrypted with a passphrase. Decrypted bytes will be downloaded.</div>
           </div>
         </div>
@@ -146,12 +369,20 @@
       <footer class="muted">OpenPGP.js v5 (browser). Interoperability with GPG/gnupg is generally good — test round trips for your chosen algorithms.</footer>
     </div>
   </div>
+  <!-- Alert Overlay -->
+  <div id="customAlert" class="alert-overlay">
+    <div id="alertBox" class="alert-box">
+      <h2 id="alertTitle">Error</h2>
+      <p id="alertMessage"></p>
+      <button id="alertMessageBtn" onclick="closeAlert()">OK</button>
+    </div>
+  </div>
 
 <script>
 (async() => {
   // openpgp is loaded as global (openpgp)
   if (!window.openpgp) {
-    alert("OpenPGP.js failed to load.");
+    showToast("OpenPGP.js failed to load.", "error");
     return;
   }
   // Shortcuts to UI
@@ -174,13 +405,15 @@
   const encryptedTextCopy = document.getElementById('encryptedTextCopy');
   const encSave = document.getElementById('encSave');
   const fileInputEnc = document.getElementById('fileInputEnc');
+  const fileNameEnc = document.getElementById('fileNameEnc');
   const encFileBtn = document.getElementById('encFileBtn');
 
-  const ciphertext = document.getElementById('ciphertext');
+  const cipherText = document.getElementById('cipherText');
   const decrypted = document.getElementById('decrypted');
   const decBtn = document.getElementById('decBtn');
   const decCopy = document.getElementById('decCopy');
   const fileInputDec = document.getElementById('fileInputDec');
+  const fileNameDec = document.getElementById('fileNameDec');
   const decFileBtn = document.getElementById('decFileBtn');
 
   // Tab switching
@@ -241,12 +474,12 @@
   async function copyText(txt){
     try{
       await navigator.clipboard.writeText(txt);
-      alert('Copied to clipboard');
+      showToast('Copied to clipboard', 'success');
     }catch(e){
       // fallback
       const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
       ta.select(); document.execCommand('copy'); ta.remove();
-      alert('Copied (fallback)');
+      showToast('Copied (fallback)', 'success');
     }
   }
 
@@ -254,8 +487,8 @@
   encBtn.addEventListener('click', async ()=>{
     const pass = passInp.value;
     const pt = plain.value;
-    if(!pass){ alert('Enter a passphrase'); return; }
-    if(!pt){ alert('Enter plain text'); return; }
+    if(!pass){ showToast('Enter a passphrase', 'error'); return; }
+    if(!pt){ showToast('Enter plain text', 'error'); return; }
     try{
       encBtn.disabled = true;
       encBtn.textContent = 'Encrypting...';
@@ -267,25 +500,25 @@
       });
       encrypted.value = armored;
     }catch(err){
-      console.error(err); alert('Encryption failed: ' + (err.message || err));
+      console.error(err); showToast('Encryption failed: ' + (err.message || err), 'error');
     }finally{ encBtn.disabled = false; encBtn.textContent = 'Encrypt'; }
   });
 
   copyPassphraseBtn.addEventListener('click', ()=> copyText(passInp.value));
   plainTextCopy.addEventListener('click', ()=> copyText(plain.value));
-  encryptedTextCopy.addEventListener('click', ()=> copyText(ciphertext.value));
+  encryptedTextCopy.addEventListener('click', ()=> copyText(cipherText.value));
   encCopy.addEventListener('click', ()=> copyText(encrypted.value));
   encSave.addEventListener('click', ()=> {
-    if(!encrypted.value){ alert('No encrypted text to save'); return; }
+    if(!encrypted.value){ showToast('No encrypted text to save', 'error'); return; }
     downloadBlob(encrypted.value, 'encrypted.asc', 'text/plain;charset=utf-8');
   });
 
   // Encrypt file (binary .gpg)
   encFileBtn.addEventListener('click', async ()=>{
     const file = fileInputEnc.files[0];
-    if(!file){ alert('Pick a file first'); return; }
+    if(!file){ showToast('Pick a file first', 'error'); return; }
     const pass = passInp.value;
-    if(!pass){ alert('Enter passphrase'); return; }
+    if(!pass){ showToast('Enter passphrase', 'error'); return; }
     try{
       encFileBtn.disabled = true; encFileBtn.textContent = 'Encrypting...';
       const arrayBuf = await file.arrayBuffer();
@@ -298,16 +531,16 @@
       // download as binary .gpg
       downloadBlob(encryptedBinary, file.name + '.gpg', 'application/octet-stream');
     }catch(err){
-      console.error(err); alert('File encryption failed: ' + (err.message || err));
+      console.error(err); showToast('File encryption failed: ' + (err.message || err), 'error');
     }finally{ encFileBtn.disabled = false; encFileBtn.textContent = 'Encrypt File & Download .gpg'; }
   });
 
   // Decrypt armored text
   decBtn.addEventListener('click', async ()=>{
     const pass = passInp.value;
-    const armored = ciphertext.value;
-    if(!pass){ alert('Enter passphrase'); return; }
-    if(!armored){ alert('Paste armored encrypted text'); return; }
+    const armored = cipherText.value;
+    if(!pass){ showToast('Enter passphrase', 'error'); return; }
+    if(!armored){ showToast('Paste armored encrypted text', 'error'); return; }
     try{
       decBtn.disabled = true; decBtn.textContent = 'Decrypting...';
       const message = await openpgp.readMessage({armoredMessage: armored});
@@ -318,7 +551,7 @@
       });
       decrypted.value = decryptedTxt;
     }catch(err){
-      console.error(err); alert('Decryption failed: ' + (err.message || err));
+      console.error(err); showToast('Decryption failed: ' + (err.message || err), 'error');
     }finally{ decBtn.disabled = false; decBtn.textContent = 'Decrypt'; }
   });
 
@@ -327,9 +560,9 @@
   // Decrypt file (.gpg) -> download decrypted bytes
   decFileBtn.addEventListener('click', async ()=>{
     const file = fileInputDec.files[0];
-    if(!file){ alert('Pick a .gpg file'); return; }
+    if(!file){ showToast('Pick a .gpg file', 'error'); return; }
     const pass = passInp.value;
-    if(!pass){ alert('Enter passphrase'); return; }
+    if(!pass){ showToast('Enter passphrase', 'error'); return; }
     try{
       decFileBtn.disabled = true; decFileBtn.textContent = 'Decrypting...';
       const arrayBuf = await file.arrayBuffer();
@@ -342,9 +575,32 @@
       // decryptedBinary is Uint8Array
       downloadBlob(new Uint8Array(decryptedBinary), file.name.replace(/\.gpg$/i, '') || 'decrypted', 'application/octet-stream');
     }catch(err){
-      console.error(err); alert('File decryption failed: ' + (err.message || err));
+      console.error(err); showToast('File decryption failed: ' + (err.message || err), 'error');
     }finally{ decFileBtn.disabled = false; decFileBtn.textContent = 'Decrypt File & Download'; }
   });
+
+
+  // const fileInputEnc = document.getElementById("fileInputEnc");
+  // const fileNameEnc = document.getElementById("fileNameEnc");
+  // const fileInputDec = document.getElementById("fileInputDec");
+  // const fileNameDec = document.getElementById("fileNameDec");
+
+  fileInputEnc.addEventListener("change", function () {
+    if (this.files.length > 0) {
+      fileNameEnc.textContent = this.files[0].name;
+    } else {
+      fileNameEnc.textContent = "No file chosen";
+    }
+  });
+  fileInputDec.addEventListener("change", function () {
+    if (this.files.length > 0) {
+      fileNameDec.textContent = this.files[0].name;
+    } else {
+      fileNameDec.textContent = "No file chosen";
+    }
+  });
+
+
 
   // Load encrypted file into textbox (optional UX)
   fileInputDec.addEventListener('change', async (ev)=>{
@@ -377,6 +633,78 @@
   // accessibility: focus first textarea
   plain.focus();
 })();
+</script>
+<script>
+  function showAlert(message, type = "success") {
+
+    const overlay = document.getElementById("customAlert");
+    const alertBox = document.getElementById("alertBox");
+    const title = document.getElementById("alertTitle");
+    const msg = document.getElementById("alertMessage");
+
+    msg.textContent = message;
+
+    if (type === "success") {
+      title.textContent = "Success";
+      alertBox.className = "alert-box alert-success";
+    } else {
+      title.textContent = "Error";
+      alertBox.className = "alert-box alert-error";
+    }
+    overlay.style.display = "flex";
+
+
+    // document.getElementById("alertMessage").textContent = message;
+    // document.getElementById("customAlert").style.display = "flex";
+  }
+
+  function closeAlert() {
+    document.getElementById("customAlert").style.display = "none";
+  }
+</script>
+<script>
+  function showToast(message, type = "info", duration = 4000) {
+    const toaster = document.getElementById("toaster");
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+
+    // SVG icons with Tailwind colors
+    const icons = {
+      success: `<svg class="icon" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
+      error: `<svg class="icon" fill="none" stroke="#ef4444" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`,
+      info: `<svg class="icon" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17z"/></svg>`,
+      warning: `<svg class="icon" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a1.5 1.5 0 0 0 1.29 2.25h17.78a1.5 1.5 0 0 0 1.29-2.25L13.71 3.86a1.5 1.5 0 0 0-2.42 0z"/></svg>`
+    };
+
+    toast.innerHTML = `
+      ${icons[type] || icons.info}
+      <div class="message">${message}</div>
+      <button class="close-btn">&times;</button>
+      <div class="progress"></div>
+    `;
+
+    toaster.appendChild(toast);
+
+    // Progress animation
+    const progress = toast.querySelector(".progress");
+    progress.style.animationDuration = duration + "ms";
+
+    // Remove logic
+    const removeToast = () => {
+      toast.style.animation = "slideOut 0.3s forwards";
+      setTimeout(() => toast.remove(), 300);
+    };
+
+    // Auto-remove
+    const timer = setTimeout(removeToast, duration);
+
+    // Manual close
+    toast.querySelector(".close-btn").addEventListener("click", () => {
+      clearTimeout(timer);
+      removeToast();
+    });
+  }
 </script>
 </body>
 </html>
