@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OpenPGP.js Symmetric Encrypt / Decrypt</title>
 
-  <!-- OpenPGP.js v5 (UMD build) -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-transparent.png">
   <script src="https://unpkg.com/openpgp@5.8.0/dist/openpgp.min.js"></script>
 
   <style>
@@ -267,7 +267,9 @@
       <div>
         <h1>OpenPGP.js — Symmetric Encrypt / Decrypt</h1>
         <div class="muted">Passphrase-based encryption (AES256). Works in browser and Node.</div>
+
       </div>
+      <div style="margin-left: auto;"><img height="50" src="assets/images/logo-transparent.png" alt="Digital Shareware"></div>
     </div>
 
     <div class="card">
@@ -286,7 +288,8 @@
           </div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
             <div class="muted">Strength: <span id="strengthText" class="strength muted">—</span></div>
-            <button id="copyPassphraseBtn" class="btn ghost small" style="margin-left:auto">Copy Passphrase</button>
+            <button class="btn ghost small" style="margin-left:auto" onclick="clearFields('passphrase')">Clear</button>
+            <button id="copyPassphraseBtn" class="btn ghost small">Copy Passphrase</button>
             <button id="suggestBtn" class="btn ghost small">Passphrase Suggest</button>
           </div>
         </div>
