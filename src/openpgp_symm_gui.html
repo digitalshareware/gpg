@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OpenPGP.js Symmetric Encrypt / Decrypt</title>
+
+  <!-- OpenPGP.js v5 (UMD build) -->
+  <script src="https://unpkg.com/openpgp@5.8.0/dist/openpgp.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#f5f7fb; --card:#ffffff; --accent:#2563eb; --muted:#6b7280;
+      --success:#16a34a; --danger:#dc2626;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#111827}
+    .app{max-width:980px;margin:0px auto;padding:10px 18px;}
+    .header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .logo{width:48px;height:48px;background:linear-gradient(135deg,#60a5fa,#2563eb);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    h1{font-size:20px;margin:0}
+    .card{background:var(--card);border-radius:8px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .tabs{display:flex;gap:8px;margin:12px 0}
+    .tab{padding:8px 12px;border-radius:6px;cursor:pointer;background:transparent;color:var(--muted);border:1px solid transparent}
+    .tab.active{background:linear-gradient(90deg,#eef2ff,#e0e7ff);color:var(--accent);border-color:rgba(37,99,235,0.12)}
+    .row{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+    label{font-size:13px;color:#111827;margin-bottom:6px;display:block}
+    input[type="password"], input[type="text"], textarea, .file-label{
+      width:100%;padding:10px;border-radius:6px;border:1px solid #e5e7eb;background:white;font-size:13px;box-sizing:border-box;
+    }
+    textarea{min-height:140px;resize:vertical;font-family:ui-monospace,monospace}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(37,99,235,0.12)}
+    .small{padding:6px 10px;font-size:13px}
+    .muted{color:var(--muted);font-size:13px}
+    .notes{font-size:13px;color:var(--muted);margin-top:8px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .strength{font-weight:600}
+    .inline{display:inline-flex;gap:8px;align-items:center}
+    .filebox{border:1px dashed #e6edf8;padding:10px;border-radius:6px;background:#fbfdff}
+    footer{margin-top:12px;font-size:12px;color:var(--muted)}
+    .center{display:flex;align-items:center;justify-content:center}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="logo">PG</div>
+      <div>
+        <h1>OpenPGP.js — Symmetric Encrypt / Decrypt</h1>
+        <div class="muted">Passphrase-based encryption (AES256). Works in browser and Node.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tabs" role="tablist">
+        <div class="tab active" id="tab-encrypt" role="tab">🔐 Encrypt</div>
+        <div class="tab" id="tab-decrypt" role="tab">🔓 Decrypt</div>
+      </div>
+
+      <!-- shared passphrase row -->
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <div style="flex:1">
+          <label for="passphrase">Passphrase</label>
+          <div style="display:flex;gap:8px">
+            <input id="passphrase" type="password" placeholder="Enter passphrase" />
+            <button id="toggleShow" class="btn ghost small" type="button">Show</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <div class="muted">Strength: <span id="strengthText" class="strength muted">—</span></div>
+            <button id="copyPassphraseBtn" class="btn ghost small" style="margin-left:auto">Copy Passphrase</button>
+            <button id="suggestBtn" class="btn ghost small">Passphrase Suggest</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Encrypt panel -->
+      <div id="panel-encrypt">
+        <div class="two">
+          <div>
+            <label for="plain">Plain text to encrypt</label>
+            <textarea id="plain" placeholder="Type / paste plain text here..."></textarea>
+            <div class="controls" style="margin-top:8px">
+              <button id="encBtn" class="btn small">Encrypt</button>
+              <button id="plainTextCopy" class="btn ghost small">Copy Plain Text</button>
+              <button id="encCopy" class="btn ghost small">Copy Encrypted</button>
+              <button id="encSave" class="btn ghost small">Save Encrypted</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="encrypted">Encrypted (ASCII-armored)</label>
+            <textarea id="encrypted" placeholder="Encrypted output appears here..." readonly></textarea>
+            <div class="muted notes">Tip: Use "Save Encrypted" to download the armored .asc text. You can also copy and paste into other tools.</div>
+          </div>
+        </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
+
+        <div>
+          <label>Encrypt a file</label>
+          <div class="filebox">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="fileInputEnc" type="file" />
+              <button id="encFileBtn" class="btn small">Encrypt File & Download .gpg</button>
+            </div>
+            <div class="notes">Selected file will be encrypted with the passphrase and downloaded as a binary `.gpg` file.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decrypt panel (hidden initially) -->
+      <div id="panel-decrypt" style="display:none">
+        <div class="two">
+          <div>
+            <label for="ciphertext">Encrypted text (ASCII-armored)</label>
+            <textarea id="ciphertext" placeholder="Paste armored encrypted text here..."></textarea>
+            <div class="controls" style="margin-top:8px">
+              <button id="decBtn" class="btn small">Decrypt</button>
+              <button id="encryptedTextCopy" class="btn ghost small">Copy Encrypted Text</button>
+              <button id="decCopy" class="btn ghost small">Copy Decrypted</button>
+            </div>
+          </div>
+
+          <div>
+            <label for="decrypted">Decrypted output</label>
+            <textarea id="decrypted" placeholder="Decrypted text appears here..." readonly></textarea>
+            <div class="muted notes">If decryption fails, check passphrase and make sure the armored block is complete.</div>
+          </div>
+        </div>
+
+        <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
+
+        <div>
+          <label>Decrypt a .gpg file</label>
+          <div class="filebox">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="fileInputDec" type="file" accept=".gpg" />
+              <button id="decFileBtn" class="btn small">Decrypt File & Download</button>
+            </div>
+            <div class="notes">Select a `.gpg` file encrypted with a passphrase. Decrypted bytes will be downloaded.</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="muted">OpenPGP.js v5 (browser). Interoperability with GPG/gnupg is generally good — test round trips for your chosen algorithms.</footer>
+    </div>
+  </div>
+
+<script>
+(async() => {
+  // openpgp is loaded as global (openpgp)
+  if (!window.openpgp) {
+    alert("OpenPGP.js failed to load.");
+    return;
+  }
+  // Shortcuts to UI
+  const tabEnc = document.getElementById('tab-encrypt');
+  const tabDec = document.getElementById('tab-decrypt');
+  const panelEnc = document.getElementById('panel-encrypt');
+  const panelDec = document.getElementById('panel-decrypt');
+
+  const passInp = document.getElementById('passphrase');
+  const toggleShow = document.getElementById('toggleShow');
+  const strengthText = document.getElementById('strengthText');
+  const suggestBtn = document.getElementById('suggestBtn');
+
+  const plain = document.getElementById('plain');
+  const encrypted = document.getElementById('encrypted');
+  const encBtn = document.getElementById('encBtn');
+  const copyPassphraseBtn = document.getElementById('copyPassphraseBtn');
+  const encCopy = document.getElementById('encCopy');
+  const plainTextCopy = document.getElementById('plainTextCopy');
+  const encryptedTextCopy = document.getElementById('encryptedTextCopy');
+  const encSave = document.getElementById('encSave');
+  const fileInputEnc = document.getElementById('fileInputEnc');
+  const encFileBtn = document.getElementById('encFileBtn');
+
+  const ciphertext = document.getElementById('ciphertext');
+  const decrypted = document.getElementById('decrypted');
+  const decBtn = document.getElementById('decBtn');
+  const decCopy = document.getElementById('decCopy');
+  const fileInputDec = document.getElementById('fileInputDec');
+  const decFileBtn = document.getElementById('decFileBtn');
+
+  // Tab switching
+  function setActive(tab){
+    if(tab === 'enc'){
+      tabEnc.classList.add('active'); tabDec.classList.remove('active');
+      panelEnc.style.display = ''; panelDec.style.display = 'none';
+    } else {
+      tabEnc.classList.remove('active'); tabDec.classList.add('active');
+      panelEnc.style.display = 'none'; panelDec.style.display = '';
+    }
+  }
+  tabEnc.addEventListener('click', ()=>setActive('enc'));
+  tabDec.addEventListener('click', ()=>setActive('dec'));
+
+  // Show / hide passphrase
+  toggleShow.addEventListener('click', ()=>{
+    if(passInp.type === 'password'){ passInp.type = 'text'; toggleShow.textContent = 'Hide'; }
+    else { passInp.type = 'password'; toggleShow.textContent = 'Show'; }
+  });
+
+  // simple strength meter
+  function strength(pass){
+    if(!pass) return '—';
+    let score = 0;
+    if(pass.length >= 12) score++;
+    if(/[A-Z]/.test(pass)) score++;
+    if(/[a-z]/.test(pass)) score++;
+    if(/\d/.test(pass)) score++;
+    if(/[^A-Za-z0-9]/.test(pass)) score++;
+    if(score <= 2) return 'Weak';
+    if(score <= 4) return 'Medium';
+    return 'Strong';
+  }
+  passInp.addEventListener('input', ()=>{ strengthText.textContent = strength(passInp.value); });
+
+  // suggest passphrase
+  suggestBtn.addEventListener('click', ()=>{
+    // 16-char random (letters+digits+symbols)
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=?";
+    let out = '';
+    let passphrase_length = 32;
+    for(let i=0;i<passphrase_length;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    passInp.value = out; passInp.dispatchEvent(new Event('input'));
+  });
+
+  // helper: download blob
+  function downloadBlob(data, filename, type){
+    const blob = new Blob([data], {type: type || 'application/octet-stream'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename || 'download.bin';
+    document.body.appendChild(a); a.click();
+    a.remove(); URL.revokeObjectURL(url);
+  }
+
+  // Copy helper
+  async function copyText(txt){
+    try{
+      await navigator.clipboard.writeText(txt);
+      alert('Copied to clipboard');
+    }catch(e){
+      // fallback
+      const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove();
+      alert('Copied (fallback)');
+    }
+  }
+
+  // Encrypt text (armored)
+  encBtn.addEventListener('click', async ()=>{
+    const pass = passInp.value;
+    const pt = plain.value;
+    if(!pass){ alert('Enter a passphrase'); return; }
+    if(!pt){ alert('Enter plain text'); return; }
+    try{
+      encBtn.disabled = true;
+      encBtn.textContent = 'Encrypting...';
+      const message = await openpgp.createMessage({text: pt});
+      const armored = await openpgp.encrypt({
+        message,
+        passwords: [pass],
+        format: 'armored'
+      });
+      encrypted.value = armored;
+    }catch(err){
+      console.error(err); alert('Encryption failed: ' + (err.message || err));
+    }finally{ encBtn.disabled = false; encBtn.textContent = 'Encrypt'; }
+  });
+
+  copyPassphraseBtn.addEventListener('click', ()=> copyText(passInp.value));
+  plainTextCopy.addEventListener('click', ()=> copyText(plain.value));
+  encryptedTextCopy.addEventListener('click', ()=> copyText(ciphertext.value));
+  encCopy.addEventListener('click', ()=> copyText(encrypted.value));
+  encSave.addEventListener('click', ()=> {
+    if(!encrypted.value){ alert('No encrypted text to save'); return; }
+    downloadBlob(encrypted.value, 'encrypted.asc', 'text/plain;charset=utf-8');
+  });
+
+  // Encrypt file (binary .gpg)
+  encFileBtn.addEventListener('click', async ()=>{
+    const file = fileInputEnc.files[0];
+    if(!file){ alert('Pick a file first'); return; }
+    const pass = passInp.value;
+    if(!pass){ alert('Enter passphrase'); return; }
+    try{
+      encFileBtn.disabled = true; encFileBtn.textContent = 'Encrypting...';
+      const arrayBuf = await file.arrayBuffer();
+      const message = await openpgp.createMessage({binary: new Uint8Array(arrayBuf)});
+      const encryptedBinary = await openpgp.encrypt({
+        message,
+        passwords: [pass],
+        format: 'binary' // returns Uint8Array
+      });
+      // download as binary .gpg
+      downloadBlob(encryptedBinary, file.name + '.gpg', 'application/octet-stream');
+    }catch(err){
+      console.error(err); alert('File encryption failed: ' + (err.message || err));
+    }finally{ encFileBtn.disabled = false; encFileBtn.textContent = 'Encrypt File & Download .gpg'; }
+  });
+
+  // Decrypt armored text
+  decBtn.addEventListener('click', async ()=>{
+    const pass = passInp.value;
+    const armored = ciphertext.value;
+    if(!pass){ alert('Enter passphrase'); return; }
+    if(!armored){ alert('Paste armored encrypted text'); return; }
+    try{
+      decBtn.disabled = true; decBtn.textContent = 'Decrypting...';
+      const message = await openpgp.readMessage({armoredMessage: armored});
+      const { data: decryptedTxt } = await openpgp.decrypt({
+        message,
+        passwords: [pass],
+        format: 'utf8'
+      });
+      decrypted.value = decryptedTxt;
+    }catch(err){
+      console.error(err); alert('Decryption failed: ' + (err.message || err));
+    }finally{ decBtn.disabled = false; decBtn.textContent = 'Decrypt'; }
+  });
+
+  decCopy.addEventListener('click', ()=> copyText(decrypted.value));
+
+  // Decrypt file (.gpg) -> download decrypted bytes
+  decFileBtn.addEventListener('click', async ()=>{
+    const file = fileInputDec.files[0];
+    if(!file){ alert('Pick a .gpg file'); return; }
+    const pass = passInp.value;
+    if(!pass){ alert('Enter passphrase'); return; }
+    try{
+      decFileBtn.disabled = true; decFileBtn.textContent = 'Decrypting...';
+      const arrayBuf = await file.arrayBuffer();
+      const message = await openpgp.readMessage({binaryMessage: new Uint8Array(arrayBuf)});
+      const { data: decryptedBinary } = await openpgp.decrypt({
+        message,
+        passwords: [pass],
+        format: 'binary'
+      });
+      // decryptedBinary is Uint8Array
+      downloadBlob(new Uint8Array(decryptedBinary), file.name.replace(/\.gpg$/i, '') || 'decrypted', 'application/octet-stream');
+    }catch(err){
+      console.error(err); alert('File decryption failed: ' + (err.message || err));
+    }finally{ decFileBtn.disabled = false; decFileBtn.textContent = 'Decrypt File & Download'; }
+  });
+
+  // Load encrypted file into textbox (optional UX)
+  fileInputDec.addEventListener('change', async (ev)=>{
+    const f = ev.target.files[0];
+    if(!f) return;
+    // don't auto-read binary into armored textbox; keep for explicit decrypt button
+  });
+
+  // Ctrl+A support in textareas and inputs
+  function selectAllHandler(e){
+    const el = e.target;
+    const tag = el.tagName.toLowerCase();
+    if(tag === 'textarea'){
+      el.select();
+      e.preventDefault();
+    }else if(tag === 'input'){
+      el.select();
+      e.preventDefault();
+    }
+  }
+  document.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a'){
+      selectAllHandler(e);
+    }
+  });
+
+  // initialize strength text
+  strengthText.textContent = strength(passInp.value);
+
+  // accessibility: focus first textarea
+  plain.focus();
+})();
+</script>
+</body>
+</html>
