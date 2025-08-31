@@ -300,16 +300,17 @@
             <textarea id="plain" placeholder="Type / paste plain text here..."></textarea>
             <div class="controls" style="margin-top:8px">
               <button id="encBtn" class="btn small">Encrypt</button>
-              <button id="plainTextCopy" class="btn ghost small">Copy Plain Text</button>
+              <button id="plainTextCopy" class="btn ghost small">Copy Text</button>
               <button id="encCopy" class="btn ghost small">Copy Encrypted</button>
               <button id="encSave" class="btn ghost small">Save Encrypted</button>
+              <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('plain')">Clear</a></div>
             </div>
           </div>
 
           <div>
             <label for="encrypted">Encrypted (ASCII-armored)</label>
             <textarea id="encrypted" placeholder="Encrypted output appears here..." readonly></textarea>
-            <div class="muted notes">Tip: Use "Save Encrypted" to download the armored .asc text. You can also copy and paste into other tools.</div>
+            <div class="muted notes">Tip: Use "Save Encrypted" to download the armored .asc text. You can also copy and paste into other tools. <a href="javascript:void(0);" onclick="clearFields('encrypted')">Clear</a></div>
           </div>
         </div>
 
@@ -339,13 +340,14 @@
               <button id="decBtn" class="btn small">Decrypt</button>
               <button id="encryptedTextCopy" class="btn ghost small">Copy Encrypted Text</button>
               <button id="decCopy" class="btn ghost small">Copy Decrypted</button>
+              <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('cipherText')">Clear</a></div>
             </div>
           </div>
 
           <div>
             <label for="decrypted">Decrypted output</label>
             <textarea id="decrypted" placeholder="Decrypted text appears here..." readonly></textarea>
-            <div class="muted notes">If decryption fails, check passphrase and make sure the armored block is complete.</div>
+            <div class="muted notes">If decryption fails, check passphrase and make sure the armored block is complete. <a href="javascript:void(0);" onclick="clearFields('decrypted')">Clear</a></div>
           </div>
         </div>
 
@@ -635,6 +637,10 @@
 })();
 </script>
 <script>
+  function clearFields(fieldId) {
+    document.getElementById(fieldId).value = "";
+    // document.getElementById("myTextarea").value = "";
+  }
   function showAlert(message, type = "success") {
 
     const overlay = document.getElementById("customAlert");
