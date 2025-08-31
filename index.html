@@ -40,7 +40,7 @@
     .filebox{border:1px dashed #e6edf8;padding:10px;border-radius:6px;background:#fbfdff}
     footer{margin-top:12px;font-size:12px;color:var(--muted)}
     .center{display:flex;align-items:center;justify-content:center}
-
+    a {color: var(--accent);}
     body {
       font-family: Arial, sans-serif;
     }
@@ -296,14 +296,15 @@
       <div id="panel-encrypt">
         <div class="two">
           <div>
-            <label for="plain">Plain text to encrypt</label>
+            <label for="plain">Plain text to encrypt <a style="float: right;padding-right: 5px;" href="javascript:void(0);" onclick="pasteFromClipboard('plain')">Paste</a></label>
             <textarea id="plain" placeholder="Type / paste plain text here..."></textarea>
             <div class="controls" style="margin-top:8px">
               <button id="encBtn" class="btn small">Encrypt</button>
-              <button id="plainTextCopy" class="btn ghost small">Copy Text</button>
+              <button id="plainTextCopy" class="btn ghost small">Copy</button>
               <button id="encCopy" class="btn ghost small">Copy Encrypted</button>
               <button id="encSave" class="btn ghost small">Save Encrypted</button>
-              <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('plain')">Clear</a></div>
+              <button onclick="clearFields('plainTextCopy')" class="btn ghost small">Clear</button>
+              <!-- <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('plain')">Clear</a></div> -->
             </div>
           </div>
 
@@ -317,7 +318,7 @@
         <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
 
         <div>
-          <label for="fileInputEnc">Encrypt a file</label>
+          <label>Encrypt a file</label>
           <div class="filebox">
             <div style="display:flex;gap:8px;align-items:center">
               <input type="file" id="fileInputEnc" class="file-input">
@@ -334,13 +335,14 @@
       <div id="panel-decrypt" style="display:none">
         <div class="two">
           <div>
-            <label for="cipherText">Encrypted text (ASCII-armored)</label>
+            <label for="cipherText">Encrypted text (ASCII-armored) <a style="float: right;padding-right: 5px;" href="javascript:void(0);" onclick="pasteFromClipboard('encrypted')">Paste</a></label>
             <textarea id="cipherText" placeholder="Paste armored encrypted text here..."></textarea>
             <div class="controls" style="margin-top:8px">
               <button id="decBtn" class="btn small">Decrypt</button>
-              <button id="encryptedTextCopy" class="btn ghost small">Copy Encrypted Text</button>
+              <button id="encryptedTextCopy" class="btn ghost small">Copy</button>
               <button id="decCopy" class="btn ghost small">Copy Decrypted</button>
-              <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('cipherText')">Clear</a></div>
+              <button onclick="clearFields('cipherText')" class="btn ghost small">Clear</button>
+              <!-- <div class="muted notes"><a href="javascript:void(0);" onclick="clearFields('cipherText')">Clear</a></div> -->
             </div>
           </div>
 
@@ -354,7 +356,7 @@
         <hr style="margin:14px 0;border:none;border-top:1px solid #eef2ff" />
 
         <div>
-          <label for="fileInputDec">Decrypt a .gpg file</label>
+          <label>Decrypt a .gpg file</label>
           <div class="filebox">
             <div style="display:flex;gap:8px;align-items:center">
               <input type="file" id="fileInputDec" class="file-input" accept=".gpg" />
@@ -639,7 +641,14 @@
 <script>
   function clearFields(fieldId) {
     document.getElementById(fieldId).value = "";
-    // document.getElementById("myTextarea").value = "";
+  }
+  async function pasteFromClipboard(fieldId) {
+    try {
+      const text = await navigator.clipboard.readText();
+      document.getElementById(fieldId).value = text;
+    } catch (err) {
+      showToast("Failed to read clipboard: " + err, "error");
+    }
   }
   function showAlert(message, type = "success") {
 
