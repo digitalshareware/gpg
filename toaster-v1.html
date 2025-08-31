@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Toaster Example</title>
+<style>
+  /* Container */
+  .toaster {
+    position: fixed;
+    right: 1rem;
+    top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    z-index: 9999;
+    pointer-events: none; /* allow clicks through gaps; toasts themselves enable pointer-events */
+    max-width: calc(100% - 2rem);
+  }
+
+  /* Single toast */
+  .toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 220px;
+    max-width: 420px;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(20, 20, 40, 0.12);
+    color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    font-size: 14px;
+    transform-origin: right top;
+    animation: slideIn .28s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toast .icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    flex: 0 0 1.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    opacity: 0.98;
+  }
+
+  .toast .message {
+    flex: 1 1 auto;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .toast .close-btn {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 6px;
+    opacity: 0.85;
+  }
+  .toast .close-btn:hover { opacity: 1; }
+
+  /* Types */
+  .toast.info { background: linear-gradient(180deg, #2563eb, #1d4ed8); }
+  .toast.success { background: linear-gradient(180deg, #2e7d32, #1b5e20); }
+  .toast.error { background: linear-gradient(180deg, #e53935, #c62828); }
+  .toast.warning { background: linear-gradient(180deg, #ff9800, #fb8c00); }
+
+  /* Small progress bar */
+  .toast .progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.22);
+    transform-origin: left;
+    width: 100%;
+    transition: transform linear;
+  }
+
+  /* Animations */
+  @keyframes slideIn {
+    from { transform: translateX(12px) scale(0.98); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0) scale(1); opacity: 1; }
+    to { transform: translateX(12px) scale(0.98); opacity: 0; }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .toaster { left: 1rem; right: 1rem; top: 1rem; align-items: center; }
+    .toast { max-width: 100%; width: auto; border-radius: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toaster" id="toaster" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Example triggers -->
+<div style="padding:1rem;">
+  <button onclick="showToast('Saved successfully!', 'success')">Show Success</button>
+  <button onclick="showToast('OpenPGP.js failed to load.', 'error')">Show Error</button>
+  <button onclick="showToast('Sync complete.', 'info')">Show Info</button>
+  <button onclick="showToast('Check your settings.', 'warning')">Show Warning</button>
+</div>
+
+<script>
+  (function () {
+    const TOASTER = document.getElementById('toaster');
+
+    /**
+     * showToast(message, type = 'info', options = { duration })
+     * - message: string or Node
+     * - type: 'info' | 'success' | 'error' | 'warning'
+     * - options.duration: milliseconds (default 4500; 0 = sticky)
+     */
+    window.showToast = function (message, type = 'info', options = {}) {
+      const duration = typeof options.duration === 'number' ? options.duration : 4500;
+
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.role = 'status';
+      toast.setAttribute('aria-live', 'polite');
+
+      // Icon (simple SVG)
+      const icons = {
+        info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm.75 15.25h-1.5v-6h1.5v6zm0-8.25h-1.5V8h1.5v1z" fill="currentColor"/></svg>',
+        success: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" fill="currentColor"/></svg>',
+        error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm3.59 13.41L15 16l-3-3-3 3-0.59-0.59L11 12 8 9l1.41-1.41L12 10l3-3 0.59 0.59L13 12l2.59 3.41z" fill="currentColor"/></svg>',
+        warning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/></svg>'
+      };
+
+      const iconWrap = document.createElement('span');
+      iconWrap.className = 'icon';
+      iconWrap.setAttribute('aria-hidden', 'true');
+      iconWrap.innerHTML = icons[type] || icons.info;
+      toast.appendChild(iconWrap);
+
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      if (typeof message === 'string') msg.textContent = message;
+      else msg.appendChild(message);
+      toast.appendChild(msg);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'close-btn';
+      closeBtn.setAttribute('aria-label', 'Dismiss notification');
+      closeBtn.innerHTML = '&times;';
+      closeBtn.onclick = () => removeToast(toast, true);
+      toast.appendChild(closeBtn);
+
+      const progress = document.createElement('div');
+      progress.className = 'progress';
+      toast.appendChild(progress);
+
+      // Add to DOM
+      TOASTER.prepend(toast); // newest on top
+
+      // Auto-dismiss logic
+      let start = null;
+      let frameId = null;
+      let remaining = duration;
+      let paused = false;
+      let startedAt = performance.now();
+
+      function tick(timestamp) {
+        if (!start) start = timestamp;
+        const elapsed = timestamp - start;
+        if (!paused && duration > 0) {
+          const pct = Math.max(0, 1 - (remaining - elapsed) / duration);
+          progress.style.transform = `scaleX(${1 - (elapsed / duration)})`;
+          if (elapsed >= duration) {
+            removeToast(toast);
+            return;
+          }
+        }
+        frameId = requestAnimationFrame(tick);
+      }
+
+      // Start timer only if duration > 0
+      if (duration > 0) {
+        frameId = requestAnimationFrame(tick);
+      } else {
+        progress.style.display = 'none';
+      }
+
+      // Pause on hover (accessible)
+      toast.addEventListener('mouseenter', () => {
+        paused = true;
+        if (frameId) cancelAnimationFrame(frameId);
+      });
+      toast.addEventListener('mouseleave', () => {
+        if (!paused) return;
+        // compute remaining by reading transform scaleX if needed
+        paused = false;
+        // restart animation with reduced remaining
+        start = null;
+        // recompute remaining time from computed style (fallback)
+        frameId = requestAnimationFrame(tick);
+      });
+
+      // Remove with animation
+      function removeToast(node, instant = false) {
+        if (!node) return;
+        if (frameId) cancelAnimationFrame(frameId);
+        if (instant) {
+          node.remove();
+          return;
+        }
+        node.style.animation = 'slideOut .18s ease-in forwards';
+        setTimeout(() => node.remove(), 180);
+      }
+
+      // remove on Escape key when focused
+      toast.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') removeToast(toast, true);
+      });
+
+      // Return the toast element for possible external control
+      return toast;
+    };
+  })();
+</script>
+
+</body>
+</html>
