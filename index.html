@@ -261,13 +261,6 @@
   <div class="toaster" id="toaster"></div>
 
   <div class="app">
-    <!-- <div>
-      <button onclick="showToast('File uploaded successfully!', 'success')">Success</button>
-      <button onclick="showToast('OpenPGP.js failed to load.', 'error')">Error</button>
-      <button onclick="showToast('New update available!', 'info')">Info</button>
-      <button onclick="showToast('Low disk space warning.', 'warning')">Warning</button>
-    </div> -->
-
     <div class="header">
       <div class="logo">PG</div>
       <div>
@@ -343,7 +336,7 @@
       <div id="panel-decrypt" style="display:none">
         <div class="two">
           <div>
-            <label for="cipherText">Encrypted text (ASCII-armored) <a style="float: right;padding-right: 5px;" href="javascript:void(0);" onclick="pasteFromClipboard('cipherText')">Paste</a></label>
+            <label for="cipherText">Encrypted text <a style="float: right;padding-right: 5px;" href="javascript:void(0);" onclick="pasteFromClipboard('cipherText')">Paste</a></label>
             <textarea id="cipherText" placeholder="Paste armored encrypted text here..."></textarea>
             <div class="controls" style="margin-top:8px">
               <button id="decBtn" class="btn small">Decrypt</button>
